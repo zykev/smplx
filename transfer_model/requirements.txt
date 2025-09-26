@@ -1,5 +1,5 @@
-numpy>=1.16.2
-torch>=1.0.1.post2
+# numpy>=1.16.2
+# torch>=1.0.1.post2
 dataclasses>=0.6
 pyrender>=0.1.23
 shapely

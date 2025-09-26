@@ -1,0 +1,19 @@
+meshy
+
+# 进入临时目录
+cd /disk1/work/zychen
+wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.gz
+tar xf boost_1_83_0.tar.gz
+cd boost_1_83_0
+
+# 配置安装目录
+./bootstrap.sh --prefix=/disk1/work/zychen/boost
+
+# 编译并安装
+./b2 install
+
+
+cd /path/to/psbody-mesh
+export BOOST_INCLUDE_DIRS=/disk1/work/zychen/boost/include
+
+pip install git+https://github.com/MarilynKeller/mesh

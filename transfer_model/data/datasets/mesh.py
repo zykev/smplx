@@ -28,6 +28,8 @@ import torch
 from torch.utils.data import Dataset
 from loguru import logger
 
+import smplx
+
 
 class MeshFolder(Dataset):
     def __init__(
@@ -40,32 +42,71 @@ class MeshFolder(Dataset):
             topology
         '''
         if exts is None:
-            exts = ['.obj', '.ply']
+            exts = ['.npy']
 
         self.data_folder = osp.expandvars(data_folder)
 
         logger.info(
             f'Building mesh folder dataset for folder: {self.data_folder}')
 
-        self.data_paths = np.array([
-            osp.join(self.data_folder, fname)
-            for fname in os.listdir(self.data_folder)
-            if any(fname.endswith(ext) for ext in exts)
-        ])
+        self.data_paths = []
+        for item_name in sorted(os.listdir(self.data_folder)):
+            item_dir = os.path.join(self.data_folder, item_name, 'param')
+            for param in os.listdir(item_dir):
+                param_path = os.path.join(item_dir, param)
+                self.data_paths.append(param_path)
+
+        # self.data_paths = np.array([
+        #     osp.join(self.data_folder, fname)
+        #     for fname in os.listdir(self.data_folder)
+        #     if any(fname.endswith(ext) for ext in exts)
+        # ])
         self.num_items = len(self.data_paths)
+
+
+        self.body_model = smplx.SMPLX('.datasets/body_models/models/smplx',
+                             gender="neutral", 
+                             create_body_pose=False, 
+                             create_betas=False, 
+                             create_global_orient=False, 
+                             create_transl=False,
+                             create_expression=False,
+                             create_jaw_pose=True, 
+                             create_leye_pose=True, 
+                             create_reye_pose=True, 
+                             create_right_hand_pose=False,
+                             create_left_hand_pose=False,
+                             use_pca=False,
+                             num_pca_comps=12,
+                             num_betas=10,
+                             flat_hand_mean=False,
+                             ext='pkl')
 
     def __len__(self) -> int:
         return self.num_items
 
     def __getitem__(self, index):
-        mesh_path = self.data_paths[index]
+        param_path = self.data_paths[index]
+
+        param = np.load(param_path, allow_pickle=True).item()
+
+        # Extract SMPL-X parameters
+        smpl_params = param['smpl_params'].reshape(1, -1)
+        scale, transl, global_orient, pose, betas, left_hand_pose, right_hand_pose, jaw_pose, leye_pose, reye_pose, expression = torch.split(smpl_params, [1, 3, 3, 63, 10, 45, 45, 3, 3, 3, 10], dim=1)
+
+        # Initialize SMPL-X model and generate vertices
+        output = self.body_model(global_orient=global_orient, body_pose=pose, betas=betas, left_hand_pose=left_hand_pose,
+                    right_hand_pose=right_hand_pose, jaw_pose=jaw_pose, leye_pose=leye_pose, reye_pose=reye_pose,
+                    expression=expression)
+        vertices = output.vertices[0].detach().cpu().numpy()
+        faces = self.body_model.faces
 
         # Load the mesh
-        mesh = trimesh.load(mesh_path, process=False)
+        # mesh = trimesh.load(mesh_path, process=False)
 
         return {
-            'vertices': np.asarray(mesh.vertices, dtype=np.float32),
-            'faces': np.asarray(mesh.faces, dtype=np.int32),
+            'vertices': np.asarray(vertices, dtype=np.float32),
+            'faces': np.asarray(faces, dtype=np.int32),
             'indices': index,
-            'paths': mesh_path,
+            'paths': param_path,
         }

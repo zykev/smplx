@@ -107,3 +107,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+transfer_data/
+
+tmp/
+output/
+
+.datasets/

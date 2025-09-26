@@ -77,6 +77,8 @@ def main() -> None:
 
     dataloader = data_obj_dict['dataloader']
 
+    keys_to_save = ["transl", "global_orient", "body_pose", "betas"]
+
     for ii, batch in enumerate(tqdm(dataloader)):
         for key in batch:
             if torch.is_tensor(batch[key]):
@@ -86,18 +88,32 @@ def main() -> None:
         paths = batch['paths']
 
         for ii, path in enumerate(paths):
-            _, fname = osp.split(path)
+            others, fname = osp.split(path)
+
+            new_path = others.replace('.datasets/HuGe100K/', output_folder)
+            new_path = new_path.replace('param', 'param_smpl')
+            os.makedirs(new_path, exist_ok=True)
 
             output_path = osp.join(
-                output_folder, f'{osp.splitext(fname)[0]}.pkl')
+                new_path, f"{fname.replace('.npy', '.pkl')}")
+            
+            # 提取指定 keys
+            save_dict = {}
+            for key, value in var_dict.items():
+                if key in keys_to_save:
+                    if value is not None:
+                        save_dict.update({key: var_dict[key][ii].detach().cpu()})
+                    else:
+                        save_dict.update({key: None})
+            # save_dict = {k: var_dict[k] for k in keys_to_save if k in var_dict}
             with open(output_path, 'wb') as f:
-                pickle.dump(var_dict, f)
+                pickle.dump(save_dict, f)
 
-            output_path = osp.join(
-                output_folder, f'{osp.splitext(fname)[0]}.obj')
-            mesh = np_mesh_to_o3d(
-                var_dict['vertices'][ii], var_dict['faces'])
-            o3d.io.write_triangle_mesh(output_path, mesh)
+            # output_path = osp.join(
+            #     new_path, f"{fname.replace('.npy', '.obj')}")
+            # mesh = np_mesh_to_o3d(
+            #     var_dict['vertices'][ii], var_dict['faces'])
+            # o3d.io.write_triangle_mesh(output_path, mesh)
 
 
 if __name__ == '__main__':
