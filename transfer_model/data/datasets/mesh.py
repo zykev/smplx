@@ -29,6 +29,7 @@ from torch.utils.data import Dataset
 from loguru import logger
 
 import smplx
+import pickle
 
 
 class MeshFolder(Dataset):
@@ -50,11 +51,9 @@ class MeshFolder(Dataset):
             f'Building mesh folder dataset for folder: {self.data_folder}')
 
         self.data_paths = []
-        for item_name in sorted(os.listdir(self.data_folder)):
-            item_dir = os.path.join(self.data_folder, item_name, 'param')
-            for param in os.listdir(item_dir):
-                param_path = os.path.join(item_dir, param)
-                self.data_paths.append(param_path)
+        for item_name in sorted(os.listdir(os.path.join(self.data_folder, 'smplx'))):
+            item_path = os.path.join(self.data_folder, 'smplx', item_name, 'smplx_param.pkl')
+            self.data_paths.append(item_path)
 
         # self.data_paths = np.array([
         #     osp.join(self.data_folder, fname)
@@ -88,17 +87,31 @@ class MeshFolder(Dataset):
     def __getitem__(self, index):
         param_path = self.data_paths[index]
 
-        param = np.load(param_path, allow_pickle=True).item()
+        smpl_params = pickle.load(open(param_path, 'rb'))
 
         # Extract SMPL-X parameters
-        smpl_params = param['smpl_params'].reshape(1, -1)
-        scale, transl, global_orient, pose, betas, left_hand_pose, right_hand_pose, jaw_pose, leye_pose, reye_pose, expression = torch.split(smpl_params, [1, 3, 3, 63, 10, 45, 45, 3, 3, 3, 10], dim=1)
 
-        # Initialize SMPL-X model and generate vertices
-        output = self.body_model(global_orient=global_orient, body_pose=pose, betas=betas, left_hand_pose=left_hand_pose,
-                    right_hand_pose=right_hand_pose, jaw_pose=jaw_pose, leye_pose=leye_pose, reye_pose=reye_pose,
-                    expression=expression)
-        vertices = output.vertices[0].detach().cpu().numpy()
+        betas=smpl_params['betas']
+        global_orient=smpl_params['global_orient']
+        body_pose=smpl_params['body_pose']
+        left_hand_pose=smpl_params['left_hand_pose']
+        right_hand_pose=smpl_params['right_hand_pose']
+        jaw_pose=smpl_params['jaw_pose']
+        leye_pose=smpl_params['leye_pose']
+        reye_pose=smpl_params['reye_pose']
+        expression=smpl_params['expression']
+
+        transl = smpl_params['transl']
+        scale = smpl_params['scale']
+
+        body = self.body_model(global_orient=global_orient, body_pose=body_pose, 
+                                betas=betas, transl=transl,
+                                left_hand_pose=left_hand_pose,
+                                right_hand_pose=right_hand_pose, jaw_pose=jaw_pose, 
+                                leye_pose=leye_pose, reye_pose=reye_pose,
+                                expression=expression)
+        
+        vertices = (body.vertices[0] * scale).detach().cpu().numpy()
         faces = self.body_model.faces
 
         # Load the mesh

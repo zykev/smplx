@@ -90,12 +90,12 @@ def main() -> None:
         for ii, path in enumerate(paths):
             others, fname = osp.split(path)
 
-            new_path = others.replace('.datasets/HuGe100K/', output_folder)
-            new_path = new_path.replace('param', 'param_smpl')
+            new_path = others.replace('.datasets/thuman/', output_folder)
+            new_path = new_path.replace('smplx', 'smpl')
             os.makedirs(new_path, exist_ok=True)
 
             output_path = osp.join(
-                new_path, f"{fname.replace('.npy', '.pkl')}")
+                new_path, f"{fname.replace('smplx', 'smpl')}")
             
             # 提取指定 keys
             save_dict = {}
