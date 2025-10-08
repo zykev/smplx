@@ -2,9 +2,9 @@ meshy
 
 # 进入临时目录
 cd /disk1/work/zychen
-wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.gz
-tar xf boost_1_83_0.tar.gz
-cd boost_1_83_0
+wget https://archives.boost.io/release/1.89.0/source/boost_1_89_0.tar.gz
+tar xzf boost_1_89_0.tar.gz
+cd boost_1_89_0
 
 # 配置安装目录
 ./bootstrap.sh --prefix=/disk1/work/zychen/boost
