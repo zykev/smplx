@@ -90,7 +90,7 @@ def main() -> None:
         for ii, path in enumerate(paths):
             others, fname = osp.split(path)
 
-            new_path = others.replace('.datasets/thuman/', output_folder)
+            new_path = others.replace('.datasets/THuman/', output_folder)
             new_path = new_path.replace('smplx', 'smpl')
             os.makedirs(new_path, exist_ok=True)
 
@@ -110,7 +110,7 @@ def main() -> None:
                 pickle.dump(save_dict, f)
 
             # output_path = osp.join(
-            #     new_path, f"{fname.replace('.npy', '.obj')}")
+            #     new_path, f"{fname.replace('smplx_param.pkl', 'smpl_param.obj')}")
             # mesh = np_mesh_to_o3d(
             #     var_dict['vertices'][ii], var_dict['faces'])
             # o3d.io.write_triangle_mesh(output_path, mesh)

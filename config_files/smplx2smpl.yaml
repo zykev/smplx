@@ -1,22 +1,22 @@
 datasets:
     mesh_folder:
-        data_folder: '.datasets/HuGe100K/batch1/flux_batch1' # 'meshes/smplx'
+        data_folder: '.datasets/THuman/' # 'meshes/smplx'
     num_workers: 4
 deformation_transfer_path: 'transfer_data/smplx2smpl_deftrafo_setup.pkl'
 mask_ids_fname: ''
 summary_steps: 100
-batch_size: 10
+batch_size: 1
 
 edge_fitting:
-    per_part: False
+    per_part: false
 
 optim:
     type: 'lbfgs'
-    maxiters: 100
-    gtol: 1e-04
+    maxiters: 300
+    gtol: 1e-08
 
 use_cuda: true
-output_folder: '.datasets/HuGe100K/'
+output_folder: '.datasets/THuman/'
 body_model:
     model_type: "smpl"
     gender: "neutral"

@@ -51,8 +51,8 @@ class MeshFolder(Dataset):
             f'Building mesh folder dataset for folder: {self.data_folder}')
 
         self.data_paths = []
-        for item_name in sorted(os.listdir(os.path.join(self.data_folder, 'smplx'))):
-            item_path = os.path.join(self.data_folder, 'smplx', item_name, 'smplx_param.pkl')
+        for item_name in sorted(os.listdir(os.path.join(self.data_folder, 'THuman2.1_smplx'))):
+            item_path = os.path.join(self.data_folder, 'THuman2.1_smplx', item_name, 'smplx_param.pkl')
             self.data_paths.append(item_path)
 
         # self.data_paths = np.array([
@@ -91,18 +91,18 @@ class MeshFolder(Dataset):
 
         # Extract SMPL-X parameters
 
-        betas=smpl_params['betas']
-        global_orient=smpl_params['global_orient']
-        body_pose=smpl_params['body_pose']
-        left_hand_pose=smpl_params['left_hand_pose']
-        right_hand_pose=smpl_params['right_hand_pose']
-        jaw_pose=smpl_params['jaw_pose']
-        leye_pose=smpl_params['leye_pose']
-        reye_pose=smpl_params['reye_pose']
-        expression=smpl_params['expression']
+        betas = torch.from_numpy(smpl_params['betas']).to(torch.float32)
+        global_orient = torch.from_numpy(smpl_params['global_orient']).to(torch.float32)
+        body_pose = torch.from_numpy(smpl_params['body_pose']).to(torch.float32)
+        left_hand_pose = torch.from_numpy(smpl_params['left_hand_pose']).to(torch.float32)
+        right_hand_pose = torch.from_numpy(smpl_params['right_hand_pose']).to(torch.float32)
+        jaw_pose = torch.from_numpy(smpl_params['jaw_pose']).to(torch.float32)
+        leye_pose = torch.from_numpy(smpl_params['leye_pose']).to(torch.float32)
+        reye_pose = torch.from_numpy(smpl_params['reye_pose']).to(torch.float32)
+        expression = torch.from_numpy(smpl_params['expression']).to(torch.float32)
 
-        transl = smpl_params['transl']
-        scale = smpl_params['scale']
+        transl = torch.from_numpy(smpl_params['transl']).to(torch.float32)
+        # scale = torch.from_numpy(smpl_params['scale']).to(torch.float32)
 
         body = self.body_model(global_orient=global_orient, body_pose=body_pose, 
                                 betas=betas, transl=transl,
@@ -111,7 +111,8 @@ class MeshFolder(Dataset):
                                 leye_pose=leye_pose, reye_pose=reye_pose,
                                 expression=expression)
         
-        vertices = (body.vertices[0] * scale).detach().cpu().numpy()
+        # vertices = (body.vertices[0] * scale).detach().cpu().numpy()
+        vertices = body.vertices[0].detach().cpu().numpy()
         faces = self.body_model.faces
 
         # Load the mesh
