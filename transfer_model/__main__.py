@@ -32,6 +32,7 @@ from .data import build_dataloader
 from .transfer_model import run_fitting
 from .utils import read_deformation_transfer, np_mesh_to_o3d
 
+import pdb
 
 def main() -> None:
     exp_cfg = parse_args()

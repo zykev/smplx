@@ -390,7 +390,8 @@ def run_fitting(
 
     body_model_output = body_model(
         return_full_pose=True, get_skin=True, **param_dict)
-    var_dict.update(body_model_output)
+    var_dict = {**body_model_output, **{"transl": var_dict["transl"]}}
+    # var_dict.update(body_model_output)
     var_dict['faces'] = body_model.faces
 
     return var_dict

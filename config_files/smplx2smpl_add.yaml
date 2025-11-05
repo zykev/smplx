@@ -1,6 +1,6 @@
 datasets:
     mesh_folder:
-        data_folder: '.datasets/HuGe100K/batch1/flux_batch1' # 'meshes/smplx'
+        data_folder: '.datasets/HuGe100K/batch8/flux_batch8' # 'meshes/smplx'
     num_workers: 4
 deformation_transfer_path: 'transfer_data/smplx2smpl_deftrafo_setup.pkl'
 mask_ids_fname: ''

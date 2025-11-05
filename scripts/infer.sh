@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 python -m transfer_model --exp-cfg config_files/smplx2smpl.yaml
